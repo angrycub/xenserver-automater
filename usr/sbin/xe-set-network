@@ -1,16 +1,41 @@
 #!/bin/bash
-XENSTOREREAD="/usr/bin/xenstore-read"
+if [ -f /etc/debian_version ]; then
+   DISTRO=debian
+ elif [ -f /etc/redhat-release ]; then
+   DISTRO=redhat
+fi
 
+XENSTOREREAD=`which xenstore-read`
 [ -x $XENSTOREREAD ] || exit 0
 
-IP=`$XENSTOREREAD vm-data/ip`
-GW=`$XENSTOREREAD vm-data/gw`
-NM=`$XENSTOREREAD vm-data/nm`
+IP=`$XENSTOREREAD vm-data/ipaddress`
+GW=`$XENSTOREREAD vm-data/gateway`
+NM=`$XENSTOREREAD vm-data/netmask`
+NS=`$XENSTOREREAD vm-data/nameserver`
+DM=`$XENSTOREREAD vm-data/hostname`
 
-for DATA in $IP $GW $NM; do
-        [ "$DATA" = "" ] && exit 0
-done
+[ "$IP" = "" ] && exit 0
+[ "$GW" = "" ] && exit 0
+[ "$NM" = "" ] && exit 0
+[ "$NS" = "" ] && exit 0
 
+if [ $DISTRO == "redhat" ]; then
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
+DEVICE=eth0
+BOOTPROTO=static
+ONBOOT=yes
+NM_CONTROLLED=yes
+IPADDR=$IP
+NETMASK=$NM
+EOF
+
+cat << EOF > /etc/sysconfig/network
+NETWORKING=yes
+HOSTNAME=$DM
+GATEWAY=$GW
+EOF
+
+elif [ $DISTRO == "debian" ]; then
 cat << EOF > /etc/network/interfaces
 auto lo
 iface lo inet loopback
@@ -20,8 +45,16 @@ iface eth0 inet static
         address $IP
         netmask $NM
         gateway $GW
+        dns-nameservers $NS
 EOF
 
-/etc/init.d/networking restart
+  if [ ! "$DM" = "" ]; then
+    echo "        dns-search $DM" >> /etc/network/interfaces
+  fi
+fi
 
+cat << EOF > /etc/resolv.conf
+search $DM
+nameserver $NS
+EOF
 exit 0

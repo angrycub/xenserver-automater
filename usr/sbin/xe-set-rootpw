@@ -1,0 +1,11 @@
+#!/bin/bash
+XENSTOREREAD=`which xenstore-read`
+if [ -e $XENSTOREREAD ]; then
+  ROOTPW=`$XENSTOREREAD vm-data/rootpw`
+
+  # require xenstore data to change root password
+  [ "$ROOTPW" = "" ] && exit 0
+
+  echo -e "$ROOTPW\n$ROOTPW" | passwd
+fi
+exit 0

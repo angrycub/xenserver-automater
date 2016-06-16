@@ -1,7 +1,33 @@
 #!/bin/bash
-XENSTOREREAD="/usr/bin/xenstore-read"
+if [ -f /etc/debian_version ]; then
+   DISTRO=debian
+ elif [ -f /etc/redhat-release ]; then
+   DISTRO=redhat
+fi
+
+XENSTOREREAD=`which xenstore-read`
 if [ -e $XENSTOREREAD ]; then
-	echo `$XENSTOREREAD name` > /etc/hostname
-	/bin/hostname -F /etc/hostname
+  NAME=`$XENSTOREREAD vm-data/hostname`
+
+  # require both the name and domain to alter configuration
+  [ "$NAME" = "" ] && exit 0
+
+  # read passed in IP address if it exists
+  IP=`$XENSTOREREAD vm-data/ipaddress`
+
+  # otherwise just use the ip address that the machine has already
+  if [ $IP = "" ]; then IP=`ip addr list eth0 | grep "inet " | cut -d' ' -f6 | cut -d/ -f1`; fi
+
+  if [ $DISTRO == "redhat" ]; then
+    sed -i "/HOSTNAME=/d" /etc/sysconfig/network
+    echo "HOSTNAME=$NAME" >> /etc/sysconfig/network
+  fi
+
+echo "$NAME" > /etc/hostname
+cat << EOF > /etc/hosts
+127.0.0.1	localhost
+$IP	$NAME
+EOF
+
 fi
 exit 0

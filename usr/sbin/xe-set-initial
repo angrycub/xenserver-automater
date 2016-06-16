@@ -1,0 +1,13 @@
+#!/bin/bash
+
+/usr/sbin/xe-set-hostname
+/usr/sbin/xe-set-network
+/usr/sbin/xe-set-rootpw
+/usr/sbin/xe-set-key-pairs
+/usr/sbin/xe-set-ssh-host-keys
+rm -rf /tmp ;mkdir /tmp;chmod 777 /tmp;chmod +t /tmp
+find /var/log -type f -exec rm {} \;
+history -c
+rm /root/.bash_history
+cp /etc/rc.local.bkp /etc/rc.local
+reboot

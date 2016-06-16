@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ -f /etc/debian_version ]; then
+   DISTRO=debian
+ elif [ -f /etc/redhat-release ]; then
+   DISTRO=redhat
+fi
+#if [ $DISTRO == "debian" ]; then
+  /bin/rm -v /etc/ssh/ssh_host_*
+#  /usr/sbin/dpkg-reconfigure openssh-server
+#elif
+  ssh-keygen -N '' -t dsa -f /etc/ssh/ssh_host_dsa_key
+  ssh-keygen -N '' -t rsa -f /etc/ssh/ssh_host_rsa_key
+#fi
+exit 0

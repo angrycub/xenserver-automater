@@ -1,0 +1,13 @@
+#!/bin/bash
+XENSTOREREAD=`which xenstore-read`
+if [ -e $XENSTOREREAD ]; then
+  KEYPAIRS=`$XENSTOREREAD vm-data/key_pairs`
+
+  # require xenstore data to change root password
+  [ "$KEYPAIRS" = "" ] && exit 0
+
+  [ ! -d /root/.ssh ] && mkdir /root/.ssh
+  echo $KEYPAIRS >> /root/.ssh/authorized_keys2
+
+fi
+exit 0
