@@ -5,6 +5,7 @@
 /usr/sbin/xe-set-rootpw
 /usr/sbin/xe-set-key-pairs
 /usr/sbin/xe-set-ssh-host-keys
+/usr/sbin/xe-set-postinstall
 rm -rf /tmp ;mkdir /tmp;chmod 777 /tmp;chmod +t /tmp
 find /var/log -type f -exec rm {} \;
 history -c

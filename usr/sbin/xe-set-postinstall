@@ -1,0 +1,11 @@
+#!/bin/bash
+XENSTOREREAD=`which xenstore-read`
+if [ -e $XENSTOREREAD ]; then
+  POSTINSTALL_SCRIPT=`$XENSTOREREAD vm-data/postinstall_script`
+
+  # require xenstore data to change root password
+  [ "$POSTINSTALL_SCRIPT" = "" ] && exit 0
+
+  wget -O- $POSTINSTALL_SCRIPT | bash -
+fi
+exit 0
